@@ -48,11 +48,9 @@ public class MainActivity extends AppCompatActivity {
     private void showDifficultyDialog() {
         final String[] difficulties = {
                 "Easy (8x8, 10 bombs)",
-                "Medium (16x16, 40 bombs)",
-                "Hard (24x24, 99 bombs)"
+                "Medium (16x8, 20 bombs)",
+                "Hard (24x12, 45 bombs)"
         };
-
-        Log.d(TAG, "Opening difficulty selection dialog");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Select Difficulty");
@@ -60,24 +58,38 @@ public class MainActivity extends AppCompatActivity {
         builder.setItems(difficulties, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int rows = 0;
-                int cols = 0;
-                int bombs = 0;
-                String difficulty = "";
+                int rows = 8; // same for all levels now
+                int cols = 8;
+                int bombs = 10;
+                String difficulty = "Easy";
 
                 switch (which) {
-                    case 0://easy
-                        rows = 8; cols = 8; bombs = 10; difficulty = "Easy";
+                    case 0:
+                        // Easy
+                        rows = 8;
+                        cols = 8;
+                        bombs = 10;
+                        difficulty = "Easy";
                         break;
-                    case 1://medium
-                        rows = 16; cols = 16; bombs = 40; difficulty = "Medium";
+
+                    case 1:
+                        // Medium
+                        rows = 16;
+                        cols = 8;
+                        bombs = 20;
+                        difficulty = "Medium";
                         break;
-                    case 2://hard
-                        rows = 24; cols = 24; bombs = 99; difficulty = "Hard";
+
+                    case 2:
+                        // Hard
+                        rows = 24;
+                        cols = 12;
+                        bombs = 45;
+                        difficulty = "Hard";
                         break;
                 }
 
-                Log.d(TAG, "Difficulty chosen: " + difficulty +
+                Log.d("MainActivity", "Difficulty chosen: " + difficulty +
                         " (" + rows + "x" + cols + ", " + bombs + " bombs)");
 
                 Intent intent = new Intent(MainActivity.this, GameActivity.class);
@@ -92,13 +104,14 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d(TAG, "Difficulty selection canceled");
+                Log.d("MainActivity", "Difficulty selection canceled");
                 dialog.dismiss();
             }
         });
 
         builder.create().show();
     }
+
 
     @Override
     protected void onStart() {
