@@ -45,10 +45,10 @@ public class GameActivity extends AppCompatActivity {
         bombs = getIntent().getIntExtra("bombs", 10);
         flagsLeft = bombs;
 
-        gameGrid = (GridLayout) findViewById(R.id.gameGrid);
-        tvFlags = (TextView) findViewById(R.id.tvFlags);
-        tvTimer = (TextView) findViewById(R.id.tvTimer);
-        btnPause = (Button) findViewById(R.id.btnPause);
+        gameGrid = findViewById(R.id.gameGrid);
+        tvFlags = findViewById(R.id.tvFlags);
+        tvTimer = findViewById(R.id.tvTimer);
+        btnPause = findViewById(R.id.btnPause);
 
         gameGrid.setColumnCount(cols);
         gameGrid.setRowCount(rows);
@@ -58,8 +58,7 @@ public class GameActivity extends AppCompatActivity {
 
         game = new MinesweeperGame(rows, cols, bombs);
 
-        ViewTreeObserver vto = gameGrid.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        gameGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 gameGrid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
@@ -100,10 +99,9 @@ public class GameActivity extends AppCompatActivity {
                 cellButton.setLayoutParams(params);
                 cellButton.setPadding(0, 0, 0, 0);
 
-                // Default style
                 cellButton.setBackgroundResource(R.drawable.cell_background);
 
-                // Handle click (reveal)
+                // Reveal click
                 cellButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -112,7 +110,7 @@ public class GameActivity extends AppCompatActivity {
                     }
                 });
 
-                // Handle long press (flag)
+                // Long press to flag
                 cellButton.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View v) {
@@ -130,17 +128,17 @@ public class GameActivity extends AppCompatActivity {
 
     private void handleCellClick(int row, int col) {
         boolean safe = game.revealCell(row, col);
-
         updateGrid();
 
         if (!safe) {
             gameOver = true;
             stopTimer();
-            showGameOverDialog(false);
-        } else if (game.checkWin()) {
+            revealAllCells();
+            showEndGameDialog(false);
+        }else if (game.checkWin()) {
             gameOver = true;
             stopTimer();
-            showGameOverDialog(true);
+            showEndGameDialog(true);
         }
     }
 
@@ -176,9 +174,41 @@ public class GameActivity extends AppCompatActivity {
                         int n = cell.getNeighborBombs();
                         btn.setText(n == 0 ? "" : String.valueOf(n));
                         btn.setBackgroundColor(0xFFDDDDDD);
+
+                        // 🎨 Color the numbers
+                        switch (n) {
+                            case 1:
+                                btn.setTextColor(0xFF0000FF); // blue
+                                break;
+                            case 2:
+                                btn.setTextColor(0xFF008000); // green
+                                break;
+                            case 3:
+                                btn.setTextColor(0xFFFF0000); // red
+                                break;
+                            case 4:
+                                btn.setTextColor(0xFF800080); // purple
+                                break;
+                            case 5:
+                                btn.setTextColor(0xFF8B0000); // dark red
+                                break;
+                            case 6:
+                                btn.setTextColor(0xFF00FFFF); // cyan
+                                break;
+                            case 7:
+                                btn.setTextColor(0xFF000000); // black
+                                break;
+                            case 8:
+                                btn.setTextColor(0xFF555555); // dark gray
+                                break;
+                            default:
+                                btn.setTextColor(0xFF000000); // default black
+                        }
                     }
+
                 } else if (cell.isFlagged()) {
                     btn.setText("🚩");
+                    btn.setTextColor(0xFF000000);
                 } else {
                     btn.setText("");
                     btn.setBackgroundResource(R.drawable.cell_background);
@@ -186,6 +216,18 @@ public class GameActivity extends AppCompatActivity {
             }
         }
     }
+
+    /** Reveal the entire board when the game is lost */
+    private void revealAllCells() {
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                Cell cell = game.getCell(row, col);
+                cell.setRevealed(true); // mark all as revealed
+            }
+        }
+        updateGrid();
+    }
+
 
     private void startTimer() {
         isPaused = false;
@@ -224,7 +266,7 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton("Return to Main Menu", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Main Menu", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 stopTimer();
@@ -239,22 +281,45 @@ public class GameActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void showGameOverDialog(boolean win) {
-        String title = win ? "You Win!" : "Game Over!";
-        String message = win ? "Congratulations, you cleared the board!" : "You hit a bomb!";
+    /** ✅ Unified Win/Lose dialog */
+    private void showEndGameDialog(boolean win) {
+        String title = win ? "🎉 You Win!" : "💣 Game Over";
+        String message = win
+                ? "(gpt thingy)! You cleared the board in " + elapsedTime + " seconds!"
+                : "You hit a bomb after " + elapsedTime + " seconds.";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
         builder.setTitle(title);
         builder.setMessage(message);
         builder.setCancelable(false);
 
-        builder.setPositiveButton("Main Menu", new DialogInterface.OnClickListener() {
+        // Play again
+        builder.setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        });
+
+        // Main menu
+        builder.setNeutralButton("Main Menu", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(GameActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
+            }
+        });
+
+        // Scoreboard
+        builder.setNegativeButton("View Scoreboard", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(GameActivity.this, ScoreboardActivity.class);
+                startActivity(intent);
             }
         });
 
