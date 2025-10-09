@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:id="@+id/tvHowToPlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:text="\n\n\n\nhow to play?\n\n
+- Tap a cell to reveal it.\n
+- Numbers show how many bombs in the eight cells surrounding it.\n
+- Long press a cell to place or remove a flag.\n
+- Flags are used for marking bombs.\n
+- Clear all safe cells to win!\n
+- If you hit a bomb, you lose the game."
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="18sp"
+        android:gravity="top|start"
+        android:textColor="#000000"
+        android:textAlignment="viewStart"
+        android:textStyle="bold"
+        android:lineSpacingExtra="4dp"
+        android:textIsSelectable="false"
+        android:padding="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnBack"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back to Main Menu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

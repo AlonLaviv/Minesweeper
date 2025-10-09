@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity"; // tag for logcat
     private Button btnPlay;
     private Button btnScoreboard;
+    private Button btnHowToPlay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnPlay = (Button) findViewById(R.id.btnPlay);
         btnScoreboard = (Button) findViewById(R.id.btnScoreboard);
+        btnHowToPlay = (Button) findViewById(R.id.btnHowToPlay);
+
 
         // PLAY button
         btnPlay.setOnClickListener(new View.OnClickListener() {
@@ -44,7 +47,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        btnHowToPlay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, HowToPlayActivity.class);
+                startActivity(intent);
+            }
+        });
     }
+
+
 
     private void showDifficultyDialog() {
         final String[] difficulties = {

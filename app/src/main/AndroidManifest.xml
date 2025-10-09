@@ -12,6 +12,7 @@
         android:theme="@style/Theme.Minesweeper">
         <activity android:name=".ScoreboardActivity" />
         <activity android:name=".GameActivity" />
+        <activity android:name=".HowToPlayActivity" />
         <activity android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
