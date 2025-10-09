@@ -14,6 +14,10 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.content.Context;
+
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -283,9 +287,10 @@ public class GameActivity extends AppCompatActivity {
 
     /** ✅ Unified Win/Lose dialog */
     private void showEndGameDialog(final boolean win) {
+        vibrate(win); // 🔔 feedback
         String title = win ? "🎉 You Win!" : "💣 Game Over";
         String message = win
-                ? "(gpt congradulates) You cleared the board in " + elapsedTime + " seconds!"
+                ? "You cleared the board in " + elapsedTime + " seconds!"
                 : "You hit a bomb after " + elapsedTime + " seconds.";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
@@ -322,4 +327,28 @@ public class GameActivity extends AppCompatActivity {
 
         builder.show();
     }
+    /** 🔔 Vibrate feedback on win or loss */
+    private void vibrate(boolean win) {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator == null) return;
+
+        // Use modern VibrationEffect if supported
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (win) {
+                vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                // three short pulses for loss
+                long[] pattern = {0, 150, 100, 150, 100, 150};
+                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
+            }
+        } else {
+            // Legacy support for pre-Android O
+            if (win) {
+                vibrator.vibrate(150);
+            } else {
+                vibrator.vibrate(new long[]{0, 150, 100, 150, 100, 150}, -1);
+            }
+        }
+    }
+
 }

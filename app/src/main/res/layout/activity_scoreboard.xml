@@ -5,30 +5,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".ScoreboardActivity"
     android:padding="16dp">
-
     <!-- Difficulty Filter Spinner -->
-    <Spinner
-        android:id="@+id/spinnerDifficulty"
-        android:paddingTop="15dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:entries="@array/difficulties"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginBottom="8dp" />
 
     <!-- Return to Main Menu Button -->
+
+    <!-- Score List -->
+    <Spinner
+        android:id="@+id/spinnerDifficulty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="52dp"
+        android:entries="@array/difficulties"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <Button
         android:id="@+id/btnReturnMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         android:text="Main Menu"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Score List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerScores"
         android:layout_width="0dp"

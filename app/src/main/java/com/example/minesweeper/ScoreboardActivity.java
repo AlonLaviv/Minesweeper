@@ -30,20 +30,26 @@ public class ScoreboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scoreboard);
 
         recyclerScores = findViewById(R.id.recyclerScores);
-        spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
+        Spinner spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
+
+        String[] difficulties = {"Easy", "Medium", "Hard"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                R.layout.spinner_selected_item,   // layout for selected item
+                difficulties
+        );
+
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item); // layout for dropdown items
+
+        spinnerDifficulty.setAdapter(adapter);
+
+
         btnReturnMain = findViewById(R.id.btnReturnMain);
 
         recyclerScores.setLayoutManager(new LinearLayoutManager(this));
         scoreDao = ScoreDatabase.getInstance(this).scoreDao();
 
-        // Set up the Spinner
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this,
-                R.array.difficulties,
-                android.R.layout.simple_spinner_item
-        );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDifficulty.setAdapter(adapter);
 
         // If coming from MainActivity or GameActivity, get difficulty
         Intent intent = getIntent();
