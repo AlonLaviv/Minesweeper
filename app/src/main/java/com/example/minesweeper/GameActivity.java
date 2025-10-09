@@ -335,18 +335,18 @@ public class GameActivity extends AppCompatActivity {
         // Use modern VibrationEffect if supported
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             if (win) {
-                vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.DEFAULT_AMPLITUDE));
+                vibrator.vibrate(VibrationEffect.createOneShot(450, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
                 // three short pulses for loss
-                long[] pattern = {0, 150, 100, 150, 100, 150};
+                long[] pattern = {0, 150, 100, 250, 100, 350};
                 vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1));
             }
         } else {
             // Legacy support for pre-Android O
             if (win) {
-                vibrator.vibrate(150);
+                vibrator.vibrate(450);
             } else {
-                vibrator.vibrate(new long[]{0, 150, 100, 150, 100, 150}, -1);
+                vibrator.vibrate(new long[]{0, 150, 100, 250, 100, 350}, -1);
             }
         }
     }
