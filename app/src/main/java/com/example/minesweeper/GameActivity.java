@@ -14,6 +14,9 @@ import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = "GameActivity";
@@ -34,6 +37,9 @@ public class GameActivity extends AppCompatActivity {
     private int elapsedTime = 0;
 
     private Button[][] cellButtons;
+
+    // Room database DAO
+    private ScoreDao scoreDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +63,7 @@ public class GameActivity extends AppCompatActivity {
         tvTimer.setText("Time: 0");
 
         game = new MinesweeperGame(rows, cols, bombs);
+        scoreDao = ScoreDatabase.getInstance(this).scoreDao();
 
         gameGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -135,11 +142,22 @@ public class GameActivity extends AppCompatActivity {
             stopTimer();
             revealAllCells();
             showEndGameDialog(false);
-        }else if (game.checkWin()) {
+        } else if (game.checkWin()) {
             gameOver = true;
             stopTimer();
+            saveScoreToDatabase(); // ✅ Save score
             showEndGameDialog(true);
         }
+    }
+
+    /** ✅ Save the score to Room database when you win */
+    private void saveScoreToDatabase() {
+        String difficulty = getIntent().getStringExtra("difficulty");
+        if (difficulty == null) difficulty = "Easy"; // fallback
+        String date = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date());
+
+        Score score = new Score(difficulty, elapsedTime, date);
+        scoreDao.insert(score);
     }
 
     private void handleCellFlag(int row, int col) {
@@ -177,32 +195,15 @@ public class GameActivity extends AppCompatActivity {
 
                         // 🎨 Color the numbers
                         switch (n) {
-                            case 1:
-                                btn.setTextColor(0xFF0000FF); // blue
-                                break;
-                            case 2:
-                                btn.setTextColor(0xFF008000); // green
-                                break;
-                            case 3:
-                                btn.setTextColor(0xFFFF0000); // red
-                                break;
-                            case 4:
-                                btn.setTextColor(0xFF800080); // purple
-                                break;
-                            case 5:
-                                btn.setTextColor(0xFF8B0000); // dark red
-                                break;
-                            case 6:
-                                btn.setTextColor(0xFF00FFFF); // cyan
-                                break;
-                            case 7:
-                                btn.setTextColor(0xFF000000); // black
-                                break;
-                            case 8:
-                                btn.setTextColor(0xFF555555); // dark gray
-                                break;
-                            default:
-                                btn.setTextColor(0xFF000000); // default black
+                            case 1: btn.setTextColor(0xFF0000FF); break; // blue
+                            case 2: btn.setTextColor(0xFF008000); break; // green
+                            case 3: btn.setTextColor(0xFFFF0000); break; // red
+                            case 4: btn.setTextColor(0xFF800080); break; // purple
+                            case 5: btn.setTextColor(0xFF8B0000); break; // dark red
+                            case 6: btn.setTextColor(0xFF00FFFF); break; // cyan
+                            case 7: btn.setTextColor(0xFF000000); break; // black
+                            case 8: btn.setTextColor(0xFF555555); break; // dark gray
+                            default: btn.setTextColor(0xFF000000); break; // default black
                         }
                     }
 
@@ -222,12 +223,11 @@ public class GameActivity extends AppCompatActivity {
         for (int row = 0; row < rows; row++) {
             for (int col = 0; col < cols; col++) {
                 Cell cell = game.getCell(row, col);
-                cell.setRevealed(true); // mark all as revealed
+                cell.setRevealed(true);
             }
         }
         updateGrid();
     }
-
 
     private void startTimer() {
         isPaused = false;
@@ -282,10 +282,10 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /** ✅ Unified Win/Lose dialog */
-    private void showEndGameDialog(boolean win) {
+    private void showEndGameDialog(final boolean win) {
         String title = win ? "🎉 You Win!" : "💣 Game Over";
         String message = win
-                ? "(gpt thingy)! You cleared the board in " + elapsedTime + " seconds!"
+                ? "(gpt congradulates) You cleared the board in " + elapsedTime + " seconds!"
                 : "You hit a bomb after " + elapsedTime + " seconds.";
 
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
@@ -293,7 +293,6 @@ public class GameActivity extends AppCompatActivity {
         builder.setMessage(message);
         builder.setCancelable(false);
 
-        // Play again
         builder.setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -303,7 +302,6 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        // Main menu
         builder.setNeutralButton("Main Menu", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -314,7 +312,6 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        // Scoreboard
         builder.setNegativeButton("View Scoreboard", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

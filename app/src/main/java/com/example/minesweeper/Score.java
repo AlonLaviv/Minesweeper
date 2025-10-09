@@ -5,13 +5,12 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "scores")
 public class Score {
-
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    public int id;
 
-    private String difficulty;
-    private int time;
-    private String date;
+    public String difficulty;
+    public int time;
+    public String date;
 
     public Score(String difficulty, int time, String date) {
         this.difficulty = difficulty;
@@ -31,11 +30,23 @@ public class Score {
         return difficulty;
     }
 
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
     public int getTime() {
         return time;
     }
 
+    public void setTime(int time) {
+        this.time = time;
+    }
+
     public String getDate() {
         return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.List;
 
 public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHolder> {
@@ -30,7 +29,7 @@ public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHol
     public void onBindViewHolder(ScoreViewHolder holder, int position) {
         Score score = scores.get(position);
         holder.tvDifficulty.setText(score.getDifficulty());
-        holder.tvTime.setText(score.getTime() + "s");
+        holder.tvTime.setText("Time: " + score.getTime() + "s");
         holder.tvDate.setText(score.getDate());
     }
 
@@ -39,7 +38,7 @@ public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHol
         return scores.size();
     }
 
-    public static class ScoreViewHolder extends RecyclerView.ViewHolder {
+    static class ScoreViewHolder extends RecyclerView.ViewHolder {
         TextView tvDifficulty, tvTime, tvDate;
 
         public ScoreViewHolder(View itemView) {

@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate: MainActivity created");//log onCreate
+        Log.d(TAG, "onCreate: MainActivity created"); // log onCreate
 
         btnPlay = (Button) findViewById(R.id.btnPlay);
         btnScoreboard = (Button) findViewById(R.id.btnScoreboard);
@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "Scoreboard button clicked");
                 Intent intent = new Intent(MainActivity.this, ScoreboardActivity.class);
+                intent.putExtra("difficulty", "Easy"); // default view
                 startActivity(intent);
             }
         });
@@ -58,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setItems(difficulties, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                int rows = 8; // same for all levels now
+                int rows = 8;
                 int cols = 8;
                 int bombs = 10;
                 String difficulty = "Easy";
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
 
-                Log.d("MainActivity", "Difficulty chosen: " + difficulty +
+                Log.d(TAG, "Difficulty chosen: " + difficulty +
                         " (" + rows + "x" + cols + ", " + bombs + " bombs)");
 
                 Intent intent = new Intent(MainActivity.this, GameActivity.class);
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d("MainActivity", "Difficulty selection canceled");
+                Log.d(TAG, "Difficulty selection canceled");
                 dialog.dismiss();
             }
         });
@@ -112,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-
+    // Lifecycle logs
     @Override
     protected void onStart() {
         super.onStart();
