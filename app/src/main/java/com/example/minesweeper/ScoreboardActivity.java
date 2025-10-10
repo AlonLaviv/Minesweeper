@@ -29,38 +29,39 @@ public class ScoreboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scoreboard);
 
-        recyclerScores = findViewById(R.id.recyclerScores);
-        Spinner spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
+        // Initialize views
+        recyclerScores = (RecyclerView) findViewById(R.id.recyclerScores);
+        spinnerDifficulty = (Spinner) findViewById(R.id.spinnerDifficulty);
+        btnReturnMain = (Button) findViewById(R.id.btnReturnMain);
 
-        String[] difficulties = {"Easy", "Medium", "Hard"};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                R.layout.spinner_selected_item,   // layout for selected item
-                difficulties
-        );
-
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item); // layout for dropdown items
-
-        spinnerDifficulty.setAdapter(adapter);
-
-
-        btnReturnMain = findViewById(R.id.btnReturnMain);
-
-        recyclerScores.setLayoutManager(new LinearLayoutManager(this));
+        // Initialize database
         scoreDao = ScoreDatabase.getInstance(this).scoreDao();
 
+        // Spinner setup
+        final String[] difficulties = {"Easy", "Medium", "Hard"};
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                R.layout.spinner_selected_item,
+                difficulties
+        );
+        adapter.setDropDownViewResource(R.layout.spinner_selected_item);
+        spinnerDifficulty.setAdapter(adapter);
 
-        // If coming from MainActivity or GameActivity, get difficulty
+        // Get difficulty passed from GameActivity or MainActivity
         Intent intent = getIntent();
-        String incomingDiff = intent.getStringExtra("difficulty");
-        if (incomingDiff != null) {
-            selectedDifficulty = incomingDiff;
+        String passedDifficulty = intent.getStringExtra("difficulty");
+        if (passedDifficulty != null) {
+            selectedDifficulty = passedDifficulty;
         }
 
-        // Set Spinner to correct difficulty
+        // Set correct spinner selection
         int spinnerPos = adapter.getPosition(selectedDifficulty);
-        spinnerDifficulty.setSelection(spinnerPos >= 0 ? spinnerPos : 0);
+        if (spinnerPos >= 0) {
+            spinnerDifficulty.setSelection(spinnerPos);
+        }
+
+        // RecyclerView setup
+        recyclerScores.setLayoutManager(new LinearLayoutManager(this));
 
         // Spinner listener
         spinnerDifficulty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -80,18 +81,18 @@ public class ScoreboardActivity extends AppCompatActivity {
         btnReturnMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ScoreboardActivity.this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                Intent mainIntent = new Intent(ScoreboardActivity.this, MainActivity.class);
+                mainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(mainIntent);
                 finish();
             }
         });
 
-        // Load scores initially
+        // Initial load
         loadScores(selectedDifficulty);
     }
 
-    /** ✅ Automatically refresh scores when activity resumes */
+    /** ✅ Refresh scores when returning to activity */
     @Override
     protected void onResume() {
         super.onResume();
@@ -104,5 +105,4 @@ public class ScoreboardActivity extends AppCompatActivity {
         scoreAdapter = new ScoreAdapter(ScoreboardActivity.this, scores);
         recyclerScores.setAdapter(scoreAdapter);
     }
-
 }

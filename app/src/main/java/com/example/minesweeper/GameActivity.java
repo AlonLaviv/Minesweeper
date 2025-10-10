@@ -321,9 +321,11 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(GameActivity.this, ScoreboardActivity.class);
+                intent.putExtra("difficulty", getIntent().getStringExtra("difficulty")); // ✅ pass current difficulty
                 startActivity(intent);
             }
         });
+
 
         builder.show();
     }
