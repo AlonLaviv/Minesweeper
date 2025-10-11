@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
         android:entries="@array/difficulties"
+        android:popupBackground="#FFFFFF"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

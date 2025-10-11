@@ -10,9 +10,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * MainActivity
+ * ------------
+ * This is the main entry point of the Minesweeper app.
+ * The user can:
+ *  - Start a new game (choosing a difficulty)
+ *  - View the scoreboard
+ *  - Read instructions on how to play
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity"; // tag for logcat
+    private static final String TAG = "MainActivity"; // Tag for Logcat
+
+    // UI elements
     private Button btnPlay;
     private Button btnScoreboard;
     private Button btnHowToPlay;
@@ -21,14 +32,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.d(TAG, "onCreate: MainActivity created"); // log onCreate
+        Log.d(TAG, "onCreate: MainActivity created");
 
+        // Bind UI components
         btnPlay = (Button) findViewById(R.id.btnPlay);
         btnScoreboard = (Button) findViewById(R.id.btnScoreboard);
         btnHowToPlay = (Button) findViewById(R.id.btnHowToPlay);
 
-
-        // PLAY button
+        /**
+         * 🎮 PLAY BUTTON
+         * Opens a dialog to choose the game difficulty
+         */
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -37,28 +51,38 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // SCOREBOARD button
+        /**
+         * 🏆 SCOREBOARD BUTTON
+         * Opens the scoreboard screen (default: Easy difficulty)
+         */
         btnScoreboard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Scoreboard button clicked");
                 Intent intent = new Intent(MainActivity.this, ScoreboardActivity.class);
-                intent.putExtra("difficulty", "Easy"); // default view
+                intent.putExtra("difficulty", "Easy"); // default difficulty view
                 startActivity(intent);
             }
         });
 
+        /**
+         * 📘 HOW TO PLAY BUTTON
+         * Opens a separate screen with instructions
+         */
         btnHowToPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "How To Play button clicked");
                 Intent intent = new Intent(MainActivity.this, HowToPlayActivity.class);
                 startActivity(intent);
             }
         });
     }
 
-
-
+    /**
+     * Displays a popup dialog that lets the user select the difficulty level.
+     * Each difficulty corresponds to different board dimensions and bomb counts.
+     */
     private void showDifficultyDialog() {
         final String[] difficulties = {
                 "Easy (8x8, 10 bombs)",
@@ -69,33 +93,31 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
         builder.setTitle("Select Difficulty");
 
+        // When a difficulty is selected
         builder.setItems(difficulties, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 int rows = 8;
                 int cols = 8;
                 int bombs = 10;
                 String difficulty = "Easy";
 
+                // Assign grid size and bombs based on choice
                 switch (which) {
                     case 0:
-                        // Easy
                         rows = 8;
                         cols = 8;
                         bombs = 10;
                         difficulty = "Easy";
                         break;
-
                     case 1:
-                        // Medium
                         rows = 16;
                         cols = 8;
                         bombs = 20;
                         difficulty = "Medium";
                         break;
-
                     case 2:
-                        // Hard
                         rows = 24;
                         cols = 12;
                         bombs = 45;
@@ -106,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Difficulty chosen: " + difficulty +
                         " (" + rows + "x" + cols + ", " + bombs + " bombs)");
 
+                // Launch the game screen with chosen settings
                 Intent intent = new Intent(MainActivity.this, GameActivity.class);
                 intent.putExtra("rows", rows);
                 intent.putExtra("cols", cols);
@@ -115,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Cancel button
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -126,7 +150,8 @@ public class MainActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    // Lifecycle logs
+    // ------------------ ACTIVITY LIFECYCLE LOGS ------------------
+
     @Override
     protected void onStart() {
         super.onStart();
