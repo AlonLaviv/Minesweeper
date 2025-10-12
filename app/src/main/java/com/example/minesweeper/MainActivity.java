@@ -35,12 +35,12 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: MainActivity created");
 
         // Bind UI components
-        btnPlay = (Button) findViewById(R.id.btnPlay);
-        btnScoreboard = (Button) findViewById(R.id.btnScoreboard);
-        btnHowToPlay = (Button) findViewById(R.id.btnHowToPlay);
+        btnPlay = findViewById(R.id.btnPlay);
+        btnScoreboard = findViewById(R.id.btnScoreboard);
+        btnHowToPlay = findViewById(R.id.btnHowToPlay);
 
         /**
-         * 🎮 PLAY BUTTON
+         * PLAY BUTTON
          * Opens a dialog to choose the game difficulty
          */
         btnPlay.setOnClickListener(new View.OnClickListener() {
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /**
-         * 🏆 SCOREBOARD BUTTON
+         * SCOREBOARD BUTTON
          * Opens the scoreboard screen (default: Easy difficulty)
          */
         btnScoreboard.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /**
-         * 📘 HOW TO PLAY BUTTON
+         * HOW TO PLAY BUTTON
          * Opens a separate screen with instructions
          */
         btnHowToPlay.setOnClickListener(new View.OnClickListener() {
