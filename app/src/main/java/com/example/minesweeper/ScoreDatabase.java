@@ -15,8 +15,8 @@ import androidx.room.RoomDatabase;
  * It uses a singleton pattern to ensure only one instance of the database
  * exists throughout the entire app.
  *
- * The database includes one entity: {@link Score}.
- * Access to the database is done through the {@link ScoreDao}.
+ * The database includes one entity: {Score}.
+ * Access to the database is done through the {ScoreDao}.
  */
 @Database(entities = {Score.class}, version = 1)
 public abstract class ScoreDatabase extends RoomDatabase {
@@ -56,9 +56,6 @@ public abstract class ScoreDatabase extends RoomDatabase {
                     // Allows database operations on the main thread.
                     // Normally discouraged, but acceptable for small apps or prototypes.
                     .allowMainThreadQueries()
-
-                    // Recreates the database if schema changes (prevents crashes during updates)
-                    .fallbackToDestructiveMigration()
 
                     // Build the database
                     .build();
