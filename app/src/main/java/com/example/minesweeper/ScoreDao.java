@@ -37,7 +37,7 @@ public interface ScoreDao {
      * Retrieves all scores that match the given difficulty.
      * Results are sorted in ascending order by completion time (best scores first).
      *
-     * @param difficulty The difficulty level (e.g. "Easy", "Medium", or "Hard").
+     * The difficulty level (e.g. "Easy", "Medium", or "Hard").
      * @return A list of Score objects for the specified difficulty.
      *
      * Example usage:
