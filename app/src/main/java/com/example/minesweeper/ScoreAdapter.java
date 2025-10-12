@@ -28,12 +28,7 @@ public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHol
     /** The list of Score objects to display */
     private List<Score> scores;
 
-    /**
-     * Constructor for the adapter
-     *
-     * @param context The current context
-     * @param scores  The list of Score objects to display
-     */
+    //Constructor for the adapter
     public ScoreAdapter(Context context, List<Score> scores) {
         this.context = context;
         this.scores = scores;
@@ -73,7 +68,8 @@ public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHol
      */
     @Override
     public int getItemCount() {
-        return scores != null ? scores.size() : 0;
+        if (scores != null) return scores.size();
+        else return 0;
     }
 
     /**
@@ -82,14 +78,10 @@ public class ScoreAdapter extends RecyclerView.Adapter<ScoreAdapter.ScoreViewHol
      */
     static class ScoreViewHolder extends RecyclerView.ViewHolder {
 
-        /** TextViews showing the score data */
+        //TextViews showing the score data
         TextView tvDifficulty, tvTime, tvDate;
 
-        /**
-         * Constructor — binds the layout views to variables
-         *
-         * @param itemView The root view of the score item layout
-         */
+        //Constructor — binds the layout views to variables
         public ScoreViewHolder(View itemView) {
             super(itemView);
             tvDifficulty = itemView.findViewById(R.id.tvDifficulty);
