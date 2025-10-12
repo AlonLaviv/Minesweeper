@@ -94,11 +94,4 @@ public class Cell {
         Log.d(TAG, "setNeighborBombs: " + count);
     }
 
-    /**
-     * Increases the count of neighboring bombs by one.
-     */
-    public void incrementNeighborBombs() {
-        this.neighborBombs = this.neighborBombs + 1;
-        Log.d(TAG, "incrementNeighborBombs: now " + this.neighborBombs);
-    }
 }
