@@ -39,36 +39,13 @@ public class Score {
     }
 
     // --- Getters and Setters ---
+    public int getId() {return id;}
+    public String getDifficulty() {return difficulty;}
+    public String getDate() {return date;}
+    public int getTime() {return time;}
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getDifficulty() {
-        return difficulty;
-    }
-
-    public void setDifficulty(String difficulty) {
-        this.difficulty = difficulty;
-    }
-
-    public int getTime() {
-        return time;
-    }
-
-    public void setTime(int time) {
-        this.time = time;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
+    public void setTime(int time) {this.time = time;}
+    public void setId(int id) {this.id = id;}
+    public void setDifficulty(String difficulty) {this.difficulty = difficulty;}
+    public void setDate(String date) {this.date = date;}
 }
