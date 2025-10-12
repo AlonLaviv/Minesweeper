@@ -48,9 +48,9 @@ public class ScoreboardActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: ScoreboardActivity created");
 
         // --- Initialize Views ---
-        recyclerScores = (RecyclerView) findViewById(R.id.recyclerScores);
-        spinnerDifficulty = (Spinner) findViewById(R.id.spinnerDifficulty);
-        btnReturnMain = (Button) findViewById(R.id.btnReturnMain);
+        recyclerScores = findViewById(R.id.recyclerScores);
+        spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
+        btnReturnMain = findViewById(R.id.btnReturnMain);
 
         // --- Initialize Database ---
         scoreDao = ScoreDatabase.getInstance(this).scoreDao();

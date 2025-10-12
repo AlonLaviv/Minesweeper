@@ -26,7 +26,7 @@ public class HowToPlayActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: HowToPlayActivity started");
 
         // Bind button from layout
-        btnBack = (Button) findViewById(R.id.btnBack);
+        btnBack = findViewById(R.id.btnBack);
 
         // Set click listener for Back button
         btnBack.setOnClickListener(new View.OnClickListener() {

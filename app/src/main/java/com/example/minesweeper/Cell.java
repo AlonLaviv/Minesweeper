@@ -30,65 +30,34 @@ public class Cell {
         Log.d(TAG, "Cell created: safe and hidden.");
     }
 
-    /**
-     * Returns true if this cell contains a bomb.
-     */
     public boolean isBomb() {
         return isBomb;
     }
 
-    /**
-     * Sets whether this cell contains a bomb.
-     */
     public void setBomb(boolean bomb) {
         this.isBomb = bomb;
-        if (bomb) {
-            Log.d(TAG, "setBomb: This cell is now a BOMB.");
-        } else {
-            Log.d(TAG, "setBomb: This cell is SAFE.");
-        }
+        if (bomb) Log.d(TAG, "setBomb: This cell is now a BOMB.");
+        else Log.d(TAG, "setBomb: This cell is SAFE.");
     }
 
-    /**
-     * Returns true if this cell has been revealed.
-     */
-    public boolean isRevealed() {
-        return isRevealed;
-    }
+    public boolean isRevealed() {return isRevealed;}
 
-    /**
-     * Sets whether this cell has been revealed.
-     */
     public void setRevealed(boolean revealed) {
         this.isRevealed = revealed;
         Log.d(TAG, "setRevealed: " + revealed);
     }
 
-    /**
-     * Returns true if this cell is flagged.
-     */
-    public boolean isFlagged() {
-        return isFlagged;
-    }
+    public boolean isFlagged() {return isFlagged;}
 
-    /**
-     * Sets whether this cell is flagged by the player.
-     */
     public void setFlagged(boolean flagged) {
         this.isFlagged = flagged;
         Log.d(TAG, "setFlagged: " + flagged);
     }
 
-    /**
-     * Returns the number of bombs surrounding this cell.
-     */
     public int getNeighborBombs() {
         return neighborBombs;
     }
 
-    /**
-     * Sets the number of bombs surrounding this cell.
-     */
     public void setNeighborBombs(int count) {
         this.neighborBombs = count;
         Log.d(TAG, "setNeighborBombs: " + count);
