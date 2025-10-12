@@ -38,12 +38,14 @@ public class GameActivity extends AppCompatActivity {
     private GridLayout gameGrid;
     private TextView tvFlags, tvTimer;
     private Button btnPause;
+    private Button btnContinue;
 
     // Game variables
     private int rows, cols, bombs;
     private int flagsLeft;
     private boolean isPaused = false;
     private boolean gameOver = false;
+    private boolean boardRevealed = false;
 
     private MinesweeperGame game;
 
@@ -103,10 +105,19 @@ public class GameActivity extends AppCompatActivity {
         btnPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Pause button clicked.");
-                showPauseMenu();
+                if (boardRevealed) {
+                    // If user already viewed the board, act as "Continue"
+                    boardRevealed = false;
+                    btnPause.setText("Pause");
+                    showEndGameDialog(game.checkWin());
+                } else {
+                    // Normal pause behavior
+                    showPauseMenu();
+                }
             }
         });
+
+
     }
 
     /**
@@ -329,40 +340,78 @@ public class GameActivity extends AppCompatActivity {
      */
     private void showPauseMenu() {
         isPaused = true;
+
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
         builder.setTitle("Game Paused");
+        builder.setCancelable(true); // ✅ allow outside tap
 
+        // Return to Game
         builder.setPositiveButton("Return to Game", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                isPaused = false;
-                timerHandler.postDelayed(timerRunnable, 1000);
+                Log.d("GameActivity", "Pause menu: Return to Game clicked");
+
+                if (!gameOver && !boardRevealed) {
+                    isPaused = false;
+                    timerHandler.postDelayed(timerRunnable, 1000);
+                }
+
                 dialog.dismiss();
-                Log.d(TAG, "Game resumed.");
             }
         });
 
-        builder.setNegativeButton("Main Menu", new DialogInterface.OnClickListener() {
+        // Main Menu
+        builder.setNeutralButton("Main Menu", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                Log.d("GameActivity", "Pause menu: Main Menu clicked");
                 stopTimer();
                 Intent intent = new Intent(GameActivity.this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "Returned to main menu.");
             }
         });
 
-        builder.setCancelable(false);
+        // Retry
+        builder.setNegativeButton("Retry", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.d("GameActivity", "Pause menu: Retry clicked");
+                stopTimer();
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
+        });
+
+        // ✅ Handle tap outside
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                Log.d("GameActivity", "Pause menu: dismissed by tapping outside — acting as Return to Game");
+
+                if (!gameOver && !boardRevealed) {
+                    isPaused = false;
+                    timerHandler.postDelayed(timerRunnable, 1000);
+                }
+
+                dialog.dismiss();
+            }
+        });
+
         builder.show();
     }
+
+
+
 
     /**
      * Shows the end-game dialog (for win or loss).
      */
     private void showEndGameDialog(final boolean win) {
-        vibrate(win);
+        vibrate(win); // Haptic feedback
+
         String title;
         String message;
 
@@ -374,22 +423,26 @@ public class GameActivity extends AppCompatActivity {
             message = "You hit a bomb after " + elapsedTime + " seconds.";
         }
 
-        Log.d(TAG, "Game ended. Win: " + win);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setCancelable(false);
+        builder.setCancelable(true); // tap outside = view board
 
-        builder.setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
+        // ✅ 1️⃣ VIEW SCOREBOARD (LEFT)
+        builder.setNegativeButton("View Scoreboard", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = getIntent();
-                finish();
+                Intent intent = new Intent(GameActivity.this, ScoreboardActivity.class);
+                String difficulty = getIntent().getStringExtra("difficulty");
+                if (difficulty == null) {
+                    difficulty = "Easy";
+                }
+                intent.putExtra("difficulty", difficulty);
                 startActivity(intent);
             }
         });
 
+        // ✅ 2️⃣ MAIN MENU (CENTER)
         builder.setNeutralButton("Main Menu", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -400,17 +453,34 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        builder.setNegativeButton("View Scoreboard", new DialogInterface.OnClickListener() {
+        // ✅ 3️⃣ RETRY (RIGHT)
+        builder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(GameActivity.this, ScoreboardActivity.class);
-                intent.putExtra("difficulty", getIntent().getStringExtra("difficulty"));
+                Intent intent = getIntent();
+                finish();
                 startActivity(intent);
             }
         });
 
-        builder.show();
+        // ✅ Tap outside → reveal board (view mode)
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                revealAllCells();
+                updateGrid();
+                btnPause.setText("Continue");
+                isPaused = true;    // freeze game
+                gameOver = true;    // prevent unpausing timer later
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
+
+
+
 
     /**
      * Vibrates the device with different patterns for win or loss.
