@@ -56,6 +56,10 @@ public class ScoreboardActivity extends AppCompatActivity {
         scoreDao = ScoreDatabase.getInstance(this).scoreDao();
         Log.d(TAG, "Database instance and DAO initialized");
 
+        // --- RecyclerView setup ---
+        recyclerScores.setLayoutManager(new LinearLayoutManager(this));
+        Log.d(TAG, "RecyclerView layout manager set");
+
         // --- Spinner Setup ---
         final String[] difficulties = {"Easy", "Medium", "Hard"};
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -81,10 +85,6 @@ public class ScoreboardActivity extends AppCompatActivity {
             spinnerDifficulty.setSelection(spinnerPos);
             Log.d(TAG, "Spinner set to position " + spinnerPos + " (" + selectedDifficulty + ")");
         }
-
-        // --- RecyclerView setup ---
-        recyclerScores.setLayoutManager(new LinearLayoutManager(this));
-        Log.d(TAG, "RecyclerView layout manager set");
 
         // --- Spinner listener for difficulty selection ---
         spinnerDifficulty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -128,11 +128,7 @@ public class ScoreboardActivity extends AppCompatActivity {
         loadScores(selectedDifficulty);
     }
 
-    /**
-     * Loads scores from the database by difficulty and updates the RecyclerView.
-     *
-     * @param difficulty The difficulty level to filter (Easy, Medium, Hard)
-     */
+    // Loads scores from the database by difficulty and updates the RecyclerView.
     private void loadScores(String difficulty) {
         List<Score> scores = scoreDao.getScoresByDifficulty(difficulty);
         Log.d(TAG, "loadScores: Retrieved " + scores.size() + " scores for difficulty: " + difficulty);
