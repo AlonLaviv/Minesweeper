@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -38,7 +39,6 @@ public class GameActivity extends AppCompatActivity {
     private GridLayout gameGrid;
     private TextView tvFlags, tvTimer;
     private Button btnPause;
-    private Button btnContinue;
 
     // Game variables
     private int rows, cols, bombs;
