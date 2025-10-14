@@ -10,10 +10,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Minesweeper">
-        <activity android:name=".ScoreboardActivity" />
-        <activity android:name=".GameActivity" />
-        <activity android:name=".HowToPlayActivity" />
-        <activity android:name=".MainActivity"
+        <activity android:name=".ScoreboardActivity" android:screenOrientation="portrait" />
+        <activity android:name=".GameActivity" android:screenOrientation="portrait" />
+        <activity android:name=".HowToPlayActivity" android:screenOrientation="portrait" />
+        <activity android:name=".MainActivity" android:screenOrientation="portrait"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
