@@ -18,6 +18,10 @@ import android.widget.TextView;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.content.Context;
+import android.widget.Toast;
+
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -34,6 +38,18 @@ import java.util.Date;
 public class GameActivity extends AppCompatActivity {
 
     private static final String TAG = "GameActivity";
+
+    //Gemini API stuff
+    private String GeminiMassage;
+    private Client client;
+    private static final String MODEL = "gemini-2.5-flash";
+    private static final String FIXED_PROMPT =
+            "give me a very short congrats sentence for wining in a game " +
+                    "of minesweeper use different results each time. " +
+                    "show only one without any syntax" +
+                    "the end of the sentence should end with (congrats emoji) You Won!" +
+                    "make sure the sentence makes sense";
+
 
     // UI Components
     private GridLayout gameGrid;
@@ -65,6 +81,10 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         Log.d(TAG, "onCreate: GameActivity started");
+        //API Gemini stuff
+        String apiKey = BuildConfig.GOOGLE_API_KEY;
+        client = Client.builder().apiKey(apiKey).build();
+        generateMessage();
 
         // Get difficulty data from intent
         rows = getIntent().getIntExtra("rows", 8);
@@ -403,7 +423,44 @@ public class GameActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     *
+     * Gets using Gemini's API a congratulation massage for the user
+     */
+    private String generateMessageSync() {
+        try {
+            GenerateContentResponse response = client.models.generateContent(
+                    MODEL,
+                    FIXED_PROMPT,
+                    null
+            );
 
+            String text = response.text();
+            return text != null ? text : "Well Played!";
+
+        } catch (Exception e) {
+            Log.d(TAG, "Exeption catched" + e.getMessage());
+            return "Well Played!";
+        }
+    }
+    private void generateMessage() {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String result = generateMessageSync();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        GeminiMassage = result;
+                        Toast.makeText(GameActivity.this, "Message generated with Gemini API: " + GeminiMassage, Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Message generated with Gemini API: " + GeminiMassage);
+                    }
+                });
+            }
+        }).start();
+    }
 
 
     /**
@@ -411,12 +468,11 @@ public class GameActivity extends AppCompatActivity {
      */
     private void showEndGameDialog(final boolean win) {
         vibrate(win); // Haptic feedback
-
         String title;
         String message;
 
         if (win) {
-            title = "🎉 You Win!";
+            title = GeminiMassage ;
             message = "You cleared the board in " + elapsedTime + " seconds!";
         } else {
             title = "💣 Game Over";
