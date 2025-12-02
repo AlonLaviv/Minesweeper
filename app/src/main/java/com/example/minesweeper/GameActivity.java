@@ -2,27 +2,24 @@ package com.example.minesweeper;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
-
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.TextView;
-
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.content.Context;
+import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
-
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -36,25 +33,24 @@ import java.util.Date;
  * - Database saving of scores
  */
 public class GameActivity extends AppCompatActivity {
-
     private static final String TAG = "GameActivity";
 
     //Gemini API stuff
     private String GeminiMassage;
     private Client client;
     private static final String MODEL = "gemini-2.5-flash";
-    private static final String FIXED_PROMPT =
-            "give me a very short congrats sentence for wining in a game " +
-                    "of minesweeper use different results each time. " +
-                    "show only one without any syntax" +
-                    "the end of the sentence should end with (congrats emoji) You Won!" +
-                    "make sure the sentence makes sense";
-
+    private static final String FIXED_PROMPT = "give me a very short congrats sentence for wining in a game " +
+            "of minesweeper use different results each time. " +
+            "show only one without any syntax" +
+            "the end of the sentence should end with (congrats emoji) You Won!" +
+            "make sure the sentence makes sense";
 
     // UI Components
     private GridLayout gameGrid;
     private TextView tvFlags, tvTimer;
     private Button btnPause;
+    private ImageView winAnimationView;
+    private ImageView lossAnimationView;
 
     // Game variables
     private int rows, cols, bombs;
@@ -62,13 +58,40 @@ public class GameActivity extends AppCompatActivity {
     private boolean isPaused = false;
     private boolean gameOver = false;
     private boolean boardRevealed = false;
-
     private MinesweeperGame game;
 
     // Timer management
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
     private int elapsedTime = 0;
+
+    // Animation management
+    private Handler animationHandler = new Handler();
+    private boolean isAnimating = false;
+
+    // Animation frames - You need to add these image files to your res/drawable folder
+    // For loss animation: loss_frame1.png, loss_frame2.png, ..., loss_frame9.png
+    // For win animation: win_frame1.png, win_frame2.png, ..., win_frame6.png
+    private int[] lossFrames = {
+            R.drawable.loss_frame1,
+            R.drawable.loss_frame2,
+            R.drawable.loss_frame3,
+            R.drawable.loss_frame4,
+            R.drawable.loss_frame5,
+            R.drawable.loss_frame6,
+            R.drawable.loss_frame7,
+            R.drawable.loss_frame8,
+            R.drawable.loss_frame9
+    };
+
+    private int[] winFrames = {
+            R.drawable.win_frame1,
+            R.drawable.win_frame2,
+            R.drawable.win_frame3,
+            R.drawable.win_frame4,
+            R.drawable.win_frame5,
+            R.drawable.win_frame1
+    };
 
     // Cell buttons for grid
     private Button[][] cellButtons;
@@ -81,6 +104,7 @@ public class GameActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         Log.d(TAG, "onCreate: GameActivity started");
+
         //API Gemini stuff
         String apiKey = BuildConfig.GOOGLE_API_KEY;
         client = Client.builder().apiKey(apiKey).build();
@@ -97,6 +121,14 @@ public class GameActivity extends AppCompatActivity {
         tvFlags = findViewById(R.id.tvFlags);
         tvTimer = findViewById(R.id.tvTimer);
         btnPause = findViewById(R.id.btnPause);
+
+        // Bind animation views
+        winAnimationView = findViewById(R.id.winAnimationView);
+        lossAnimationView = findViewById(R.id.lossAnimationView);
+
+        // Hide animation views initially
+        winAnimationView.setVisibility(View.GONE);
+        lossAnimationView.setVisibility(View.GONE);
 
         // Initialize grid and labels
         gameGrid.setColumnCount(cols);
@@ -136,8 +168,6 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     /**
@@ -146,7 +176,6 @@ public class GameActivity extends AppCompatActivity {
     private void createGrid() {
         gameGrid.removeAllViews();
         cellButtons = new Button[rows][cols];
-
         int gridWidth = gameGrid.getWidth();
         int gridHeight = gameGrid.getHeight();
         int cellSize = Math.min(gridWidth / cols, gridHeight / rows);
@@ -232,11 +261,9 @@ public class GameActivity extends AppCompatActivity {
         if (difficulty == null) {
             difficulty = "Easy";
         }
-
         String date = DateFormat.getDateTimeInstance().format(new Date());
         Score score = new Score(difficulty, elapsedTime, date);
         scoreDao.insert(score);
-
         Log.d(TAG, "Score saved: " + difficulty + " - " + elapsedTime + "s at " + date);
     }
 
@@ -258,7 +285,6 @@ public class GameActivity extends AppCompatActivity {
                 flagsLeft = flagsLeft - 1;
             }
         }
-
         tvFlags.setText("Flags: " + flagsLeft);
         updateGrid();
     }
@@ -274,21 +300,17 @@ public class GameActivity extends AppCompatActivity {
 
                 if (cell.isRevealed()) {
                     btn.setEnabled(false);
-
                     if (cell.isBomb()) {
                         btn.setText("💣");
                         btn.setBackgroundColor(0xFFFF4444); // Red
                     } else {
                         int n = cell.getNeighborBombs();
-
                         if (n == 0) {
                             btn.setText("");
                         } else {
                             btn.setText(String.valueOf(n));
                         }
-
                         btn.setBackgroundColor(0xFFDDDDDD);
-
                         // Color numbers
                         if (n == 1) btn.setTextColor(0xFF0000FF);
                         else if (n == 2) btn.setTextColor(0xFF008000);
@@ -330,7 +352,6 @@ public class GameActivity extends AppCompatActivity {
     private void startTimer() {
         isPaused = false;
         elapsedTime = 0;
-
         timerRunnable = new Runnable() {
             @Override
             public void run() {
@@ -341,7 +362,6 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         };
-
         timerHandler.postDelayed(timerRunnable, 1000);
         Log.d(TAG, "Timer started.");
     }
@@ -360,7 +380,6 @@ public class GameActivity extends AppCompatActivity {
      */
     private void showPauseMenu() {
         isPaused = true;
-
         AlertDialog.Builder builder = new AlertDialog.Builder(GameActivity.this);
         builder.setTitle("Game Paused");
         builder.setCancelable(true); // ✅ allow outside tap
@@ -370,12 +389,10 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Log.d("GameActivity", "Pause menu: Return to Game clicked");
-
                 if (!gameOver && !boardRevealed) {
                     isPaused = false;
                     timerHandler.postDelayed(timerRunnable, 1000);
                 }
-
                 dialog.dismiss();
             }
         });
@@ -410,12 +427,10 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onCancel(DialogInterface dialog) {
                 Log.d("GameActivity", "Pause menu: dismissed by tapping outside — acting as Return to Game");
-
                 if (!gameOver && !boardRevealed) {
                     isPaused = false;
                     timerHandler.postDelayed(timerRunnable, 1000);
                 }
-
                 dialog.dismiss();
             }
         });
@@ -424,7 +439,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     *
      * Gets using Gemini's API a congratulation massage for the user
      */
     private String generateMessageSync() {
@@ -434,22 +448,19 @@ public class GameActivity extends AppCompatActivity {
                     FIXED_PROMPT,
                     null
             );
-
             String text = response.text();
             return text != null ? text : "Well Played!";
-
         } catch (Exception e) {
-            Log.d(TAG, "Exeption catched" + e.getMessage());
-            return "Well Played!";
+            Log.d(TAG, "Exception caught" + e.getMessage());
+            return "Exceptionally Played!";
         }
     }
-    private void generateMessage() {
 
+    private void generateMessage() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 final String result = generateMessageSync();
-
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -462,17 +473,40 @@ public class GameActivity extends AppCompatActivity {
         }).start();
     }
 
-
     /**
-     * Shows the end-game dialog (for win or loss).
+     * Shows the end-game dialog with animation (for win or loss).
      */
     private void showEndGameDialog(final boolean win) {
-        vibrate(win); // Haptic feedback
+        vibrate(win);
+
+        // Stop any ongoing animation first
+        stopAnimation();
+
+        // Show animation
+        if (win) {
+            showWinAnimation();
+        } else {
+            showLossAnimation();
+        }
+
+        // Wait for animation to complete before showing dialog
+        animationHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                showEndGameDialogAfterAnimation(win);
+            }
+        }, 1500); // Wait 1.5 seconds for animation
+    }
+
+    /**
+     * Shows the actual end game dialog after animation completes
+     */
+    private void showEndGameDialogAfterAnimation(final boolean win) {
         String title;
         String message;
 
         if (win) {
-            title = GeminiMassage ;
+            title = GeminiMassage;
             message = "You cleared the board in " + elapsedTime + " seconds!";
         } else {
             title = "💣 Game Over";
@@ -526,17 +560,97 @@ public class GameActivity extends AppCompatActivity {
                 revealAllCells();
                 updateGrid();
                 btnPause.setText("Continue");
-                isPaused = true;    // freeze game
-                gameOver = true;    // prevent unpausing timer later
+                isPaused = true; // freeze game
+                gameOver = true; // prevent unpausing timer later
+                // Hide any visible animation
+                winAnimationView.setVisibility(View.GONE);
+                lossAnimationView.setVisibility(View.GONE);
             }
         });
+
+        // Hide animations before showing dialog
+        winAnimationView.setVisibility(View.GONE);
+        lossAnimationView.setVisibility(View.GONE);
 
         AlertDialog dialog = builder.create();
         dialog.show();
     }
 
+    /**
+     * Plays the win animation
+     */
+    private void showWinAnimation() {
+        if (isAnimating) return;
+        isAnimating = true;
 
+        winAnimationView.setVisibility(View.VISIBLE);
+        winAnimationView.bringToFront();
 
+        playAnimation(winAnimationView, winFrames, 0, 80, true);
+    }
+
+    /**
+     * Plays the loss animation
+     */
+    private void showLossAnimation() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        lossAnimationView.setVisibility(View.VISIBLE);
+        lossAnimationView.bringToFront();
+
+        playAnimation(lossAnimationView, lossFrames, 0, 120, false);
+    }
+
+    /**
+     * Recursive method to play frame-by-frame animation
+     * @param imageView The ImageView to animate
+     * @param frames Array of drawable resource IDs
+     * @param frameIndex Current frame index
+     * @param delayMs Delay between frames in milliseconds
+     * @param loop Whether to loop the animation
+     */
+    private void playAnimation(final ImageView imageView, final int[] frames,
+                               final int frameIndex, final int delayMs, final boolean loop) {
+        if (frameIndex >= frames.length) {
+            if (loop) {
+                // Loop the animation
+                playAnimation(imageView, frames, 0, delayMs, loop);
+            } else {
+                // Animation complete
+                isAnimating = false;
+                // Keep the last frame visible for a moment
+                animationHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView.setVisibility(View.GONE);
+                    }
+                }, 500);
+            }
+            return;
+        }
+
+        // Set current frame
+        imageView.setImageResource(frames[frameIndex]);
+
+        // Schedule next frame
+        animationHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                playAnimation(imageView, frames, frameIndex + 1, delayMs, loop);
+            }
+        }, delayMs);
+    }
+
+    /**
+     * Stops any ongoing animation
+     */
+    private void stopAnimation() {
+        animationHandler.removeCallbacksAndMessages(null);
+        isAnimating = false;
+        winAnimationView.setVisibility(View.GONE);
+        lossAnimationView.setVisibility(View.GONE);
+    }
 
     /**
      * Vibrates the device with different patterns for win or loss.
@@ -562,7 +676,6 @@ public class GameActivity extends AppCompatActivity {
                 vibrator.vibrate(pattern, -1);
             }
         }
-
         Log.d(TAG, "Vibration triggered. Win: " + win);
     }
 }
