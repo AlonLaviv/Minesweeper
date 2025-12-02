@@ -89,8 +89,7 @@ public class GameActivity extends AppCompatActivity {
             R.drawable.win_frame2,
             R.drawable.win_frame3,
             R.drawable.win_frame4,
-            R.drawable.win_frame5,
-            R.drawable.win_frame1
+            R.drawable.win_frame5
     };
 
     // Cell buttons for grid
